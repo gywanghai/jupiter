@@ -35,7 +35,7 @@ public class DemoApplication {
         jobScheduler.subscribeTaskExecutionListener(new TaskExecutionListenerImpl2());
         jobScheduler.subscribeSchedulerListener(new JobSchedulerListenerImpl());
         TaskDetail taskDetail = new TaskDetail();
-        taskDetail.setTenantId(1L);
+        taskDetail.setTenantId("10000000000");
         taskDetail.setTenantName("租户1");
         taskDetail.setProjectName("项目1");
         taskDetail.setName("任务1");
