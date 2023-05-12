@@ -10,8 +10,7 @@ import org.quartz.TriggerKey;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
 import top.ershixiong.jupiter.adapter.quartz.utils.QuartzUtils;
-import top.ershixiong.jupiter.domain.AbstractJobScheduler;
-import top.ershixiong.jupiter.domain.QuartzTriggerFactory;
+import top.ershixiong.jupiter.domain.AbstractTaskScheduler;
 import top.ershixiong.jupiter.domain.Task;
 import top.ershixiong.jupiter.domain.vo.TaskDetail;
 
@@ -22,19 +21,20 @@ import java.util.Set;
  * 使用Quartz实现的JobScheduler
  */
 @Component
-public class QuartzJobScheduler extends AbstractJobScheduler {
+public class QuartzTaskScheduler extends AbstractTaskScheduler {
 
-    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(QuartzJobScheduler.class);
+    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(QuartzTaskScheduler.class);
 
     private final Scheduler scheduler;
 
     private Set<QuartzTriggerFactory> triggerFactories = new HashSet<>();
 
-    public QuartzJobScheduler(Scheduler scheduler) {
+    public QuartzTaskScheduler(Scheduler scheduler) {
         // 加载所有的触发器工厂
         triggerFactories.add(new CronQuartzTriggerFactory());
         triggerFactories.add(new FixedDelayQuartzTriggerFactory());
         triggerFactories.add(new FixedRateQuartzTriggerFactory());
+        triggerFactories.add(new RetryableTaskQuartzTriggerFactory());
         this.scheduler = scheduler;
     }
 
@@ -58,14 +58,14 @@ public class QuartzJobScheduler extends AbstractJobScheduler {
     @Override
     public void scheduleJobInternal(TaskDetail taskDetail, Runnable runnable) throws Exception {
         try {
-            JobDetail jobDetail = JobBuilder.newJob(RunnableJob.class)
+            JobDetail jobDetail = JobBuilder.newJob(RunnableTask.class)
                     .withIdentity(taskDetail.getName(), QuartzUtils.getGroupName(taskDetail))
                     .build();
-            jobDetail.getJobDataMap().put(RunnableJob.RUNNABLE_KEY, runnable);
+            jobDetail.getJobDataMap().put(RunnableTask.RUNNABLE_KEY, runnable);
 
             Trigger quartzTrigger = createTrigger(taskDetail);
             if (quartzTrigger == null) {
-                LOGGER.error("添加定时调度任务失败，未找到对应的触发器工厂");
+                LOGGER.error("添加定时调度任务失败，未找到对应的触发器");
                 return;
             }
             scheduler.scheduleJob(jobDetail, quartzTrigger);
@@ -85,7 +85,7 @@ public class QuartzJobScheduler extends AbstractJobScheduler {
     private Trigger createTrigger(TaskDetail taskDetail) {
         // 根据JobTrigger类型获取对应的TriggerFactory
         for (QuartzTriggerFactory quartzTriggerFactory : triggerFactories) {
-            if (taskDetail.getJobTrigger().getClass() == quartzTriggerFactory.jobTriggerClass()) {
+            if (taskDetail.getTaskTrigger().getClass() == quartzTriggerFactory.jobTriggerClass()) {
                 return quartzTriggerFactory.createTrigger(taskDetail);
             }
         }

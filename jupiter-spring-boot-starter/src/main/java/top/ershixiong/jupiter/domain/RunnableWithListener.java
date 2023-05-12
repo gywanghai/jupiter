@@ -28,22 +28,24 @@ public class RunnableWithListener implements Runnable {
     public void run() {
         boolean success = false;
         TaskDetail taskDetail = context.getTaskDetail();
-        JobTrigger jobTrigger = taskDetail.getJobTrigger();
+        TaskTrigger taskTrigger = taskDetail.getTaskTrigger();
         try {
-            int remainCount = jobTrigger.remainCount();
+            int remainCount = taskTrigger.remainCount();
             if (remainCount == 0) {
                 LOGGER.info("任务执行次数已用完");
                 return;
             }
-            Date startAt = jobTrigger.startAt();
-            Date endAt = jobTrigger.endAt();
+            Date startAt = taskTrigger.startAt();
+            Date endAt = taskTrigger.endAt();
             if (startAt != null && endAt != null && !DateUtils.isBetween(startAt, endAt)) {
                 LOGGER.info("任务不在执行时间范围内");
                 return;
             }
             // 任务执行前触发
             for (TaskExecutionListener listener : taskExecutionListeners) {
-                listener.beforeTaskExecution(context);
+                if (listener.supports(context)) {
+                    listener.beforeTaskExecution(context);
+                }
             }
             Task task = context.getTask();
             task.execute(context);
@@ -52,13 +54,17 @@ public class RunnableWithListener implements Runnable {
             LOGGER.error("任务执行失败", e);
             // 任务执行异常触发
             for (TaskExecutionListener listener : taskExecutionListeners) {
-                listener.onTaskExecutionException(context, e);
+                if (listener.supports(context)) {
+                    listener.onTaskExecutionException(context, e);
+                }
             }
         } finally {
             if (success) {
                 // 任务执行后触发
                 for (TaskExecutionListener listener : taskExecutionListeners) {
-                    listener.afterTaskExecution(context);
+                    if (listener.supports(context)) {
+                        listener.afterTaskExecution(context);
+                    }
                 }
             }
         }

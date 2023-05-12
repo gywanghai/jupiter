@@ -1,6 +1,7 @@
-package top.ershixiong.jupiter.domain;
+package top.ershixiong.jupiter.adapter.quartz;
 
 import org.quartz.Trigger;
+import top.ershixiong.jupiter.domain.TaskTrigger;
 import top.ershixiong.jupiter.domain.vo.TaskDetail;
 
 /**
@@ -8,7 +9,8 @@ import top.ershixiong.jupiter.domain.vo.TaskDetail;
  */
 public interface QuartzTriggerFactory {
 
-    Class<? extends JobTrigger> jobTriggerClass();
+    Class<? extends TaskTrigger> jobTriggerClass();
 
     Trigger createTrigger(TaskDetail taskDetail);
+
 }

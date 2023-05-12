@@ -4,9 +4,8 @@ import org.quartz.SimpleScheduleBuilder;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
 import top.ershixiong.jupiter.adapter.quartz.utils.QuartzUtils;
-import top.ershixiong.jupiter.domain.FixedRateJobTrigger;
-import top.ershixiong.jupiter.domain.JobTrigger;
-import top.ershixiong.jupiter.domain.QuartzTriggerFactory;
+import top.ershixiong.jupiter.domain.FixedRateTaskTrigger;
+import top.ershixiong.jupiter.domain.TaskTrigger;
 import top.ershixiong.jupiter.domain.vo.TaskDetail;
 
 import java.util.Date;
@@ -17,13 +16,13 @@ import java.util.Date;
 public class FixedRateQuartzTriggerFactory implements QuartzTriggerFactory {
 
     @Override
-    public Class<? extends JobTrigger> jobTriggerClass() {
-        return FixedRateJobTrigger.class;
+    public Class<? extends TaskTrigger> jobTriggerClass() {
+        return FixedRateTaskTrigger.class;
     }
 
     @Override
     public Trigger createTrigger(TaskDetail taskDetail) {
-        FixedRateJobTrigger fixedRateJobTrigger = (FixedRateJobTrigger) taskDetail.getJobTrigger();
+        FixedRateTaskTrigger fixedRateJobTrigger = (FixedRateTaskTrigger) taskDetail.getTaskTrigger();
         Date startAt = new Date(System.currentTimeMillis() + fixedRateJobTrigger.getInitialDelay());
         return TriggerBuilder.newTrigger()
                 .withIdentity(taskDetail.getName(), QuartzUtils.getGroupName(taskDetail))

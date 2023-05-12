@@ -5,7 +5,7 @@ import top.ershixiong.jupiter.domain.vo.TaskDetail;
 /**
  * 调度器接口
  */
-public interface JobScheduler {
+public interface TaskScheduler {
 
     /**
      * 任务调度器名称
@@ -56,14 +56,14 @@ public interface JobScheduler {
      *
      * @param listener 监听器
      */
-    void subscribeSchedulerListener(JobSchedulerListener listener);
+    void subscribeSchedulerListener(TaskSchedulerListener listener);
 
     /**
      * 移除任务调度器监听器
      *
      * @param listener 监听器
      */
-    void unsubscribeSchedulerListener(JobSchedulerListener listener);
+    void unsubscribeSchedulerListener(TaskSchedulerListener listener);
 
     /**
      * 注册任务执行监听器

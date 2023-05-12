@@ -11,20 +11,20 @@ import top.ershixiong.jupiter.domain.vo.TaskDetail;
 @ToString
 public class TaskExecutionContext {
 
-    private JobScheduler jobScheduler;
+    private TaskScheduler taskScheduler;
 
     private Task task;
 
     private TaskDetail taskDetail;
 
-    public TaskExecutionContext(JobScheduler jobScheduler, TaskDetail taskDetail, Task task) {
-        this.jobScheduler = jobScheduler;
+    public TaskExecutionContext(TaskScheduler taskScheduler, TaskDetail taskDetail, Task task) {
+        this.taskScheduler = taskScheduler;
         this.taskDetail = taskDetail;
         this.task = task;
     }
 
-    public TaskExecutionContext(JobScheduler jobScheduler, TaskDetail taskDetail) {
-        this.jobScheduler = jobScheduler;
+    public TaskExecutionContext(TaskScheduler taskScheduler, TaskDetail taskDetail) {
+        this.taskScheduler = taskScheduler;
         this.taskDetail = taskDetail;
     }
 }

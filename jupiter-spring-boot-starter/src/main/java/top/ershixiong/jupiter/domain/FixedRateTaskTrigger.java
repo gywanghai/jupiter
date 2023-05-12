@@ -3,13 +3,13 @@ package top.ershixiong.jupiter.domain;
 /**
  * 固定频率触发器
  */
-public class FixedRateJobTrigger extends AbstractJobTrigger {
+public class FixedRateTaskTrigger extends AbstractTaskTrigger {
 
     private long fixedRate;
 
     private long initialDelay;
 
-    public FixedRateJobTrigger(long fixedRate, long initialDelay) {
+    public FixedRateTaskTrigger(long fixedRate, long initialDelay) {
         this.fixedRate = fixedRate;
         this.initialDelay = initialDelay;
     }

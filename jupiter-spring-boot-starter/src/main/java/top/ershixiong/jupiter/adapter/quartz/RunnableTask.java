@@ -8,7 +8,7 @@ import org.quartz.JobExecutionException;
 /**
  * 将Runnable类型的任务转换为Job类型的任务
  */
-public class RunnableJob implements Job {
+public class RunnableTask implements Job {
     public static final String RUNNABLE_KEY = "runnable";
 
     @Override

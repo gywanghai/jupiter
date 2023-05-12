@@ -5,7 +5,7 @@ import java.util.Date;
 /**
  * 任务触发器
  */
-public interface JobTrigger {
+public interface TaskTrigger {
 
     /**
      * 剩余执行次数

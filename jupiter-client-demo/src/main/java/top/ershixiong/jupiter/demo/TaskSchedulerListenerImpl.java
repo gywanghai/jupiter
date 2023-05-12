@@ -2,25 +2,25 @@ package top.ershixiong.jupiter.demo;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import top.ershixiong.jupiter.domain.JobScheduler;
-import top.ershixiong.jupiter.domain.JobSchedulerListener;
 import top.ershixiong.jupiter.domain.TaskExecutionContext;
+import top.ershixiong.jupiter.domain.TaskScheduler;
+import top.ershixiong.jupiter.domain.TaskSchedulerListener;
 
 /**
  * 任务调度器监听器，用于监听任务调度的事件
  */
-public class JobSchedulerListenerImpl implements JobSchedulerListener {
+public class TaskSchedulerListenerImpl implements TaskSchedulerListener {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(JobSchedulerListenerImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(TaskSchedulerListenerImpl.class);
 
     @Override
-    public void onSchedulerStart(JobScheduler jobScheduler) {
-        LOGGER.info("onSchedulerStart: jobScheduler = {}", jobScheduler.getName());
+    public void onSchedulerStart(TaskScheduler taskScheduler) {
+        LOGGER.info("onSchedulerStart: taskScheduler = {}", taskScheduler.getName());
     }
 
     @Override
-    public void onSchedulerShutdown(JobScheduler jobScheduler) {
-        LOGGER.info("onSchedulerShutdown: jobScheduler = {}", jobScheduler.getName());
+    public void onSchedulerShutdown(TaskScheduler taskScheduler) {
+        LOGGER.info("onSchedulerShutdown: taskScheduler = {}", taskScheduler.getName());
     }
 
     @Override
@@ -37,6 +37,7 @@ public class JobSchedulerListenerImpl implements JobSchedulerListener {
     @Override
     public void onScheduleJobFailed(TaskExecutionContext taskExecutionContext, Throwable cause) {
         LOGGER.error("onScheduleJobFailed, context: {}, error: {}", taskExecutionContext, cause);
+        taskExecutionContext.getTaskScheduler().scheduleJob(taskExecutionContext.getTaskDetail(), taskExecutionContext.getTask());
     }
 
     @Override

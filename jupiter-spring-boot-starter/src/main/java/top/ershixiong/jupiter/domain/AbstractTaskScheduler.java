@@ -11,9 +11,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
 /**
  * 调度器抽象类
  */
-public abstract class AbstractJobScheduler implements JobScheduler {
+public abstract class AbstractTaskScheduler implements TaskScheduler {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractJobScheduler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractTaskScheduler.class);
 
     /**
      * 任务装饰器集合
@@ -23,12 +23,16 @@ public abstract class AbstractJobScheduler implements JobScheduler {
     /**
      * 任务调度器监听器集合
      */
-    protected List<JobSchedulerListener> jobSchedulerListeners = new CopyOnWriteArrayList<>();
+    protected List<TaskSchedulerListener> taskSchedulerListeners = new CopyOnWriteArrayList<>();
 
     /**
      * 任务执行监听器集合
      */
     protected List<TaskExecutionListener> taskExecutionListeners = new CopyOnWriteArrayList<>();
+
+    public AbstractTaskScheduler() {
+
+    }
 
     @Override
     public String getName() {
@@ -45,26 +49,35 @@ public abstract class AbstractJobScheduler implements JobScheduler {
         try {
             boolean schedule = true;
             // 任务调度前触发
-            for (JobSchedulerListener listener : jobSchedulerListeners) {
-                schedule = schedule && listener.beforeScheduleJob(taskExecutionContext);
+            for (TaskSchedulerListener listener : taskSchedulerListeners) {
+                // 是否支持该监听器
+                if (listener.supports(taskExecutionContext)) {
+                    schedule = schedule && listener.beforeScheduleJob(taskExecutionContext);
+                    if (!schedule) {
+                        LOGGER.info("取消添加定时任务: {}", taskDetail.getName());
+                        break;
+                    }
+                }
             }
             if (schedule) {
                 // 调度任务
                 scheduleJobInternal(taskDetail, new RunnableWithListener(taskExecutionListeners, taskExecutionContext));
                 success = true;
-            } else {
-                LOGGER.info("取消添加定时任务: {}", taskDetail.getName());
             }
         } catch (Exception e) {
             LOGGER.error("添加定时任务失败", e);
-            for (JobSchedulerListener listener : jobSchedulerListeners) {
-                listener.onScheduleJobFailed(taskExecutionContext, e);
+            for (TaskSchedulerListener listener : taskSchedulerListeners) {
+                if (listener.supports(taskExecutionContext)) {
+                    listener.onScheduleJobFailed(taskExecutionContext, e);
+                }
             }
         } finally {
             if (success) {
                 // 任务调度后触发
-                for (JobSchedulerListener listener : jobSchedulerListeners) {
-                    listener.afterScheduleJob(taskExecutionContext);
+                for (TaskSchedulerListener listener : taskSchedulerListeners) {
+                    if (listener.supports(taskExecutionContext)) {
+                        listener.afterScheduleJob(taskExecutionContext);
+                    }
                 }
             }
         }
@@ -85,20 +98,26 @@ public abstract class AbstractJobScheduler implements JobScheduler {
         TaskExecutionContext taskExecutionContext = new TaskExecutionContext(this, taskDetail, task);
         try {
             // 任务修改前触发
-            for (JobSchedulerListener listener : jobSchedulerListeners) {
-                listener.beforeModifyJob(taskExecutionContext);
+            for (TaskSchedulerListener listener : taskSchedulerListeners) {
+                if (listener.supports(taskExecutionContext)) {
+                    listener.beforeModifyJob(taskExecutionContext);
+                }
             }
             // 修改任务
             result = modifyJobInternal(taskDetail, task);
         } catch (Exception e) {
             LOGGER.error("修改定时任务失败", e);
-            for (JobSchedulerListener listener : jobSchedulerListeners) {
-                listener.onModifyJobFailed(taskExecutionContext, e);
+            for (TaskSchedulerListener listener : taskSchedulerListeners) {
+                if (listener.supports(taskExecutionContext)) {
+                    listener.onModifyJobFailed(taskExecutionContext, e);
+                }
             }
         } finally {
             // 任务修改后触发
-            for (JobSchedulerListener listener : jobSchedulerListeners) {
-                listener.afterModifyJob(taskExecutionContext);
+            for (TaskSchedulerListener listener : taskSchedulerListeners) {
+                if (listener.supports(taskExecutionContext)) {
+                    listener.afterModifyJob(taskExecutionContext);
+                }
             }
         }
         return result;
@@ -109,20 +128,27 @@ public abstract class AbstractJobScheduler implements JobScheduler {
         TaskExecutionContext taskExecutionContext = new TaskExecutionContext(this, taskDetail);
         try {
             // 任务删除前触发
-            for (JobSchedulerListener listener : jobSchedulerListeners) {
-                listener.beforeDeleteJob(taskExecutionContext);
+            for (TaskSchedulerListener listener : taskSchedulerListeners) {
+                // 是否支持该监听器
+                if (listener.supports(taskExecutionContext)) {
+                    listener.beforeDeleteJob(taskExecutionContext);
+                }
             }
             // 删除任务
             deleteJobInternal(taskDetail);
         } catch (Exception e) {
             LOGGER.error("删除定时任务失败", e);
-            for (JobSchedulerListener listener : jobSchedulerListeners) {
-                listener.onDeleteJobFailed(taskExecutionContext, e);
+            for (TaskSchedulerListener listener : taskSchedulerListeners) {
+                if (listener.supports(taskExecutionContext)) {
+                    listener.onDeleteJobFailed(taskExecutionContext, e);
+                }
             }
         } finally {
             // 任务删除后触发
-            for (JobSchedulerListener listener : jobSchedulerListeners) {
-                listener.afterDeleteJob(taskExecutionContext);
+            for (TaskSchedulerListener listener : taskSchedulerListeners) {
+                if (listener.supports(taskExecutionContext)) {
+                    listener.afterDeleteJob(taskExecutionContext);
+                }
             }
         }
     }
@@ -137,20 +163,26 @@ public abstract class AbstractJobScheduler implements JobScheduler {
         TaskExecutionContext taskExecutionContext = new TaskExecutionContext(this, taskDetail);
         try {
             // 任务暂停前触发
-            for (JobSchedulerListener listener : jobSchedulerListeners) {
-                listener.beforePauseJob(taskExecutionContext);
+            for (TaskSchedulerListener listener : taskSchedulerListeners) {
+                if (listener.supports(taskExecutionContext)) {
+                    listener.beforePauseJob(taskExecutionContext);
+                }
             }
             // 暂停任务
             pauseJobInternal(taskDetail);
         } catch (Exception e) {
             LOGGER.error("暂停定时任务失败", e);
-            for (JobSchedulerListener listener : jobSchedulerListeners) {
-                listener.onPauseJobFailed(taskExecutionContext, e);
+            for (TaskSchedulerListener listener : taskSchedulerListeners) {
+                if (listener.supports(taskExecutionContext)) {
+                    listener.onPauseJobFailed(taskExecutionContext, e);
+                }
             }
         } finally {
             // 任务暂停后触发
-            for (JobSchedulerListener listener : jobSchedulerListeners) {
-                listener.afterPauseJob(taskExecutionContext);
+            for (TaskSchedulerListener listener : taskSchedulerListeners) {
+                if (listener.supports(taskExecutionContext)) {
+                    listener.afterPauseJob(taskExecutionContext);
+                }
             }
         }
     }
@@ -165,20 +197,26 @@ public abstract class AbstractJobScheduler implements JobScheduler {
         TaskExecutionContext taskExecutionContext = new TaskExecutionContext(this, taskDetail);
         try {
             // 任务恢复前触发
-            for (JobSchedulerListener listener : jobSchedulerListeners) {
-                listener.beforeResumeJob(taskExecutionContext);
+            for (TaskSchedulerListener listener : taskSchedulerListeners) {
+                if (listener.supports(taskExecutionContext)) {
+                    listener.beforeResumeJob(taskExecutionContext);
+                }
             }
             // 恢复任务
             resumeJobInternal(taskDetail);
         } catch (Exception e) {
             LOGGER.error("恢复定时任务失败", e);
-            for (JobSchedulerListener listener : jobSchedulerListeners) {
-                listener.onResumeJobFailed(taskExecutionContext, e);
+            for (TaskSchedulerListener listener : taskSchedulerListeners) {
+                if (listener.supports(taskExecutionContext)) {
+                    listener.onResumeJobFailed(taskExecutionContext, e);
+                }
             }
         } finally {
             // 任务恢复后触发
-            for (JobSchedulerListener listener : jobSchedulerListeners) {
-                listener.afterResumeJob(taskExecutionContext);
+            for (TaskSchedulerListener listener : taskSchedulerListeners) {
+                if (listener.supports(taskExecutionContext)) {
+                    listener.afterResumeJob(taskExecutionContext);
+                }
             }
         }
     }
@@ -202,16 +240,16 @@ public abstract class AbstractJobScheduler implements JobScheduler {
      * 添加任务装饰器
      */
     @Override
-    public void subscribeSchedulerListener(JobSchedulerListener listener) {
-        jobSchedulerListeners.add(listener);
+    public void subscribeSchedulerListener(TaskSchedulerListener listener) {
+        taskSchedulerListeners.add(listener);
     }
 
     /**
      * 移除任务装饰器
      */
     @Override
-    public void unsubscribeSchedulerListener(JobSchedulerListener listener) {
-        jobSchedulerListeners.remove(listener);
+    public void unsubscribeSchedulerListener(TaskSchedulerListener listener) {
+        taskSchedulerListeners.remove(listener);
     }
 
     /**

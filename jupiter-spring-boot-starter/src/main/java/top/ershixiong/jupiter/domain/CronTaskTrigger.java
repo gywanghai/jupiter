@@ -2,13 +2,13 @@ package top.ershixiong.jupiter.domain;
 
 
 /**
- * CronJobTrigger 用于定义Cron表达式的触发器
+ * CronTaskTrigger 用于定义Cron表达式的触发器
  */
-public class CronJobTrigger extends AbstractJobTrigger {
+public class CronTaskTrigger extends AbstractTaskTrigger {
 
     private String cron;
 
-    public CronJobTrigger(String cron) {
+    public CronTaskTrigger(String cron) {
         this.cron = cron;
     }
 

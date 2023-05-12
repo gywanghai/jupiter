@@ -3,27 +3,36 @@ package top.ershixiong.jupiter.domain;
 /**
  * 任务调度器监听器，用于监听任务调度器的事件
  */
-public interface JobSchedulerListener {
+public interface TaskSchedulerListener {
 
     /**
      * 任务调度器启动时触发
      *
-     * @param jobScheduler 任务调度器
+     * @param taskScheduler 任务调度器
      */
-    void onSchedulerStart(JobScheduler jobScheduler);
+    void onSchedulerStart(TaskScheduler taskScheduler);
 
     /**
      * 任务调度器关闭时触发
      *
-     * @param jobScheduler 任务调度器
+     * @param taskScheduler 任务调度器
      */
-    void onSchedulerShutdown(JobScheduler jobScheduler);
+    void onSchedulerShutdown(TaskScheduler taskScheduler);
+
+    /**
+     * 是否支持
+     *
+     * @param taskExecutionContext
+     * @return
+     */
+    default boolean supports(TaskExecutionContext taskExecutionContext) {
+        return true;
+    }
 
     /**
      * 添加定时任务前触发
      *
      * @param taskExecutionContext 任务执行上下文
-     *
      * @return 返回false则不添加任务, 返回true则添加任务
      */
     boolean beforeScheduleJob(TaskExecutionContext taskExecutionContext);

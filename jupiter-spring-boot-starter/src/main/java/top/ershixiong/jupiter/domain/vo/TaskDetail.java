@@ -3,7 +3,7 @@ package top.ershixiong.jupiter.domain.vo;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import top.ershixiong.jupiter.domain.JobTrigger;
+import top.ershixiong.jupiter.domain.TaskTrigger;
 
 /**
  * 任务详情
@@ -47,5 +47,5 @@ public class TaskDetail {
     /**
      * 任务触发信息
      */
-    private JobTrigger jobTrigger;
+    private TaskTrigger taskTrigger;
 }

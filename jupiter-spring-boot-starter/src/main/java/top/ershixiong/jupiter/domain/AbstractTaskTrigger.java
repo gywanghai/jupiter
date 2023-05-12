@@ -6,7 +6,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * 抽象任务触发器
  */
-public abstract class AbstractJobTrigger implements JobTrigger {
+public abstract class AbstractTaskTrigger implements TaskTrigger {
 
     private AtomicInteger remainCounter = new AtomicInteger(Integer.MAX_VALUE);
 

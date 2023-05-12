@@ -3,9 +3,11 @@ package top.ershixiong.jupiter.api.controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@RequestMapping(value = "/job-scheduler")
+/**
+ * TaskSchedulerController
+ */
+@RequestMapping(value = "/task-scheduler")
 @RestController
-public class JobSchedulerController {
-
+public class TaskSchedulerController {
 
 }
