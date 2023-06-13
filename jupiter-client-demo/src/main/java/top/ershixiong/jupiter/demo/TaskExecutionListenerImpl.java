@@ -28,6 +28,7 @@ public class TaskExecutionListenerImpl implements TaskExecutionListener {
     public void onTaskExecutionException(TaskExecutionContext taskExecutionContext, Throwable e) {
         LOGGER.info("onTaskExecutionException, taskExecutionContext: {}", taskExecutionContext, e);
     }
+
 }
 
 

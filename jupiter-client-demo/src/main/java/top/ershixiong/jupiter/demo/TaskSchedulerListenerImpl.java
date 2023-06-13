@@ -24,9 +24,8 @@ public class TaskSchedulerListenerImpl implements TaskSchedulerListener {
     }
 
     @Override
-    public boolean beforeScheduleJob(TaskExecutionContext taskExecutionContext) {
+    public void beforeScheduleJob(TaskExecutionContext taskExecutionContext) {
         LOGGER.info("beforeScheduleJob, context: {}", taskExecutionContext);
-        return true;
     }
 
     @Override
@@ -37,7 +36,6 @@ public class TaskSchedulerListenerImpl implements TaskSchedulerListener {
     @Override
     public void onScheduleJobFailed(TaskExecutionContext taskExecutionContext, Throwable cause) {
         LOGGER.error("onScheduleJobFailed, context: {}, error: {}", taskExecutionContext, cause);
-        taskExecutionContext.getTaskScheduler().scheduleJob(taskExecutionContext.getTaskDetail(), taskExecutionContext.getTask());
     }
 
     @Override

@@ -51,7 +51,7 @@
             <dependency>
                 <groupId>top.ershixiong</groupId>
                 <artifactId>jupiter-spring-boot-starter</artifactId>
-                <version>${project.parent.version}</version>
+                <version>${project.version}</version>
             </dependency>
 
         </dependencies>

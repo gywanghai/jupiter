@@ -35,7 +35,7 @@ public interface TaskSchedulerListener {
      * @param taskExecutionContext 任务执行上下文
      * @return 返回false则不添加任务, 返回true则添加任务
      */
-    boolean beforeScheduleJob(TaskExecutionContext taskExecutionContext);
+    void beforeScheduleJob(TaskExecutionContext taskExecutionContext);
 
     /**
      * 添加定时任务后触发

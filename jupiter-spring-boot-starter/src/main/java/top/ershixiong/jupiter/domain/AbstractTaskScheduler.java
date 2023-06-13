@@ -30,10 +30,6 @@ public abstract class AbstractTaskScheduler implements TaskScheduler {
      */
     protected List<TaskExecutionListener> taskExecutionListeners = new CopyOnWriteArrayList<>();
 
-    public AbstractTaskScheduler() {
-
-    }
-
     @Override
     public String getName() {
         return this.getClass().getTypeName();
@@ -44,25 +40,13 @@ public abstract class AbstractTaskScheduler implements TaskScheduler {
         // 装饰任务
         Task decoratedTask = decorateJob(task);
         TaskExecutionContext taskExecutionContext = new TaskExecutionContext(this, taskDetail, decoratedTask);
-        // 是否调度成功
-        boolean success = false;
         try {
-            boolean schedule = true;
             // 任务调度前触发
             for (TaskSchedulerListener listener : taskSchedulerListeners) {
                 // 是否支持该监听器
                 if (listener.supports(taskExecutionContext)) {
-                    schedule = schedule && listener.beforeScheduleJob(taskExecutionContext);
-                    if (!schedule) {
-                        LOGGER.info("取消添加定时任务: {}", taskDetail.getName());
-                        break;
-                    }
+                    scheduleJobInternal(taskExecutionContext);
                 }
-            }
-            if (schedule) {
-                // 调度任务
-                scheduleJobInternal(taskDetail, new RunnableWithListener(taskExecutionListeners, taskExecutionContext));
-                success = true;
             }
         } catch (Exception e) {
             LOGGER.error("添加定时任务失败", e);
@@ -72,12 +56,9 @@ public abstract class AbstractTaskScheduler implements TaskScheduler {
                 }
             }
         } finally {
-            if (success) {
-                // 任务调度后触发
-                for (TaskSchedulerListener listener : taskSchedulerListeners) {
-                    if (listener.supports(taskExecutionContext)) {
-                        listener.afterScheduleJob(taskExecutionContext);
-                    }
+            for (TaskSchedulerListener listener : taskSchedulerListeners) {
+                if (listener.supports(taskExecutionContext)) {
+                    listener.afterScheduleJob(taskExecutionContext);
                 }
             }
         }
@@ -87,10 +68,10 @@ public abstract class AbstractTaskScheduler implements TaskScheduler {
     /**
      * 调度任务的抽象方法
      *
-     * @param taskDetail 任务详情
-     * @param runnable   Runnable类型的任务
+     * @param taskExecutionContext 任务执行上下文
+     *{@link TaskExecutionContext}
      */
-    public abstract void scheduleJobInternal(TaskDetail taskDetail, Runnable runnable) throws Exception;
+    public abstract void scheduleJobInternal(TaskExecutionContext taskExecutionContext) throws Exception;
 
     @Override
     public Object modifyJob(TaskDetail taskDetail, Task task) {

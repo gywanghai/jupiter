@@ -5,8 +5,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
 import top.ershixiong.jupiter.adapter.quartz.QuartzTaskScheduler;
-import top.ershixiong.jupiter.domain.RetryableTaskExecutionListener;
-import top.ershixiong.jupiter.domain.RetryableTaskTrigger;
+import top.ershixiong.jupiter.domain.FixedRateTaskTrigger;
 import top.ershixiong.jupiter.domain.Task;
 import top.ershixiong.jupiter.domain.TaskExecutionContext;
 import top.ershixiong.jupiter.domain.TaskScheduler;
@@ -29,12 +28,12 @@ public class DemoApplication {
 
     private static final int SLEEP_TIME = 60000;
 
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) throws Exception {
         ApplicationContext applicationContext = SpringApplication.run(DemoApplication.class, args);
         TaskScheduler taskScheduler = applicationContext.getBean(QuartzTaskScheduler.class);
 //        TaskTrigger taskTrigger = new CronTaskTrigger("0/10 * * * * ?");
 //        TaskTrigger taskTrigger = new FixedRateTaskTrigger(1000, 0);
-        taskScheduler.subscribeTaskExecutionListener(new RetryableTaskExecutionListener());
+        taskScheduler.subscribeTaskExecutionListener(new TaskExecutionListenerImpl());
         taskScheduler.subscribeSchedulerListener(new TaskSchedulerListenerImpl());
         TaskDetail taskDetail = new TaskDetail();
         taskDetail.setTenantId("10000000000");
@@ -45,7 +44,7 @@ public class DemoApplication {
         taskDetail.setType(TaskType.NORMAL);
         taskDetail.setShardingIndex(0);
         taskDetail.setShardingCount(1);
-        TaskTrigger taskTrigger = new RetryableTaskTrigger(RETRY_INTERVALS);
+        TaskTrigger taskTrigger = new FixedRateTaskTrigger(1000, 0);
         taskDetail.setTaskTrigger(taskTrigger);
 //        taskScheduler.addTaskDecorator(new TaskDecorator() {
 //            @Override
@@ -94,11 +93,9 @@ public class DemoApplication {
 //            }
 //        });
         taskScheduler.scheduleJob(taskDetail, new Task() {
-
             @Override
             public void execute(TaskExecutionContext context) {
                 LOGGER.info("Hello World! {}, ThreadName {}", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()), Thread.currentThread().getName());
-                LOGGER.info("{}", 1 / 0);
             }
         });
         taskScheduler.start();

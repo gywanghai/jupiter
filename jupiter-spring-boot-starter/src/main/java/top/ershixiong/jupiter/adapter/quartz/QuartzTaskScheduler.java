@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import top.ershixiong.jupiter.adapter.quartz.utils.QuartzUtils;
 import top.ershixiong.jupiter.domain.AbstractTaskScheduler;
 import top.ershixiong.jupiter.domain.Task;
+import top.ershixiong.jupiter.domain.TaskExecutionContext;
 import top.ershixiong.jupiter.domain.vo.TaskDetail;
 
 import java.util.HashSet;
@@ -34,7 +35,6 @@ public class QuartzTaskScheduler extends AbstractTaskScheduler {
         triggerFactories.add(new CronQuartzTriggerFactory());
         triggerFactories.add(new FixedDelayQuartzTriggerFactory());
         triggerFactories.add(new FixedRateQuartzTriggerFactory());
-        triggerFactories.add(new RetryableTaskQuartzTriggerFactory());
         this.scheduler = scheduler;
     }
 
@@ -48,21 +48,16 @@ public class QuartzTaskScheduler extends AbstractTaskScheduler {
         }
     }
 
-    /**
-     * 添加定时调度任务
-     *
-     * @param taskDetail 任务详情
-     * @param runnable   Runnable类型的任务
-     * @throws SchedulerException
-     */
     @Override
-    public void scheduleJobInternal(TaskDetail taskDetail, Runnable runnable) throws Exception {
+    public void scheduleJobInternal(TaskExecutionContext taskExecutionContext) throws Exception {
         try {
+            Task task = taskExecutionContext.getTask();
+            TaskDetail taskDetail = taskExecutionContext.getTaskDetail();
             JobDetail jobDetail = JobBuilder.newJob(RunnableTask.class)
                     .withIdentity(taskDetail.getName(), QuartzUtils.getGroupName(taskDetail))
                     .build();
-            jobDetail.getJobDataMap().put(RunnableTask.RUNNABLE_KEY, runnable);
-
+            jobDetail.getJobDataMap().put(RunnableTask.TASK_KEY, task);
+            jobDetail.getJobDataMap().put(RunnableTask.TASK_EXECUTION_CONTEXT_KEY, taskExecutionContext);
             Trigger quartzTrigger = createTrigger(taskDetail);
             if (quartzTrigger == null) {
                 LOGGER.error("添加定时调度任务失败，未找到对应的触发器");

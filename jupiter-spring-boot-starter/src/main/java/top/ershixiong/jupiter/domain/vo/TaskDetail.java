@@ -22,6 +22,7 @@ public class TaskDetail {
     // 项目名称
     private String projectName;
 
+    // 任务ID
     private String id;
 
     // 任务名称
